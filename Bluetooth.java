@@ -1,13 +1,9 @@
 package com.example.atilla.peixealimentador;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,82 +16,52 @@ import java.util.UUID;
  * Created by Atilla on 01-Aug-17.
  */
 
-public class Bluetooth extends Activity{
+public class Bluetooth{
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothDevice mmDevice;
     private BluetoothSocket mmSocket;
     private OutputStream outStream;
     private InputStream inputStream;
     private final int REQUEST_ENABLE_BT = 1;
-    private String nomeDispositivo;
-
-    private Context context;
 
     /**
-     * @param context
-     * @param nomeDispositivo
      */
-    public Bluetooth(Context context, String nomeDispositivo){
-        this.context = (Context) context;
-        this.nomeDispositivo  = nomeDispositivo;
+    public Bluetooth(){
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter == null){
-            Toast.makeText(context, "Seu dispositivo não possui suporte a bluetooth", Toast.LENGTH_LONG);
-        }
-        if(bluetoothAdapter.isEnabled()){
-            Intent bluetoothEnableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-
-        }
-        CheckBlueToothState();
     }
 
     /**
      * Verifica se o dispositivo possui bluetooth e também se ele está ativado, caso não esteja
      * ativado ele pede permissão ao usuário para ativar
      */
-    private void CheckBlueToothState() {
+
+    public int checkBlueToothState() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            Toast.makeText(this, "Seu dispositivo não possui suporte a bluetooth", Toast.LENGTH_LONG);
+            return 1;
         }
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent bluetoothEnableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            ((Activity)context).startActivityForResult(bluetoothEnableIntent, REQUEST_ENABLE_BT);
-        }
-            findBT();
-            try {
-                openBT();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (!bluetoothAdapter.isEnabled())
+            return 2;
+        else
+            return 0;
     }
 
     /**
      * Encontra os dispositivos PAREADOS com o seu dispositivo que possue o nome igual ao passado
      * no construtor
      */
-    void findBT() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-        }
 
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBluetooth, 0);
-        }
-        allPairDevices();
-    }
-
-    private void allPairDevices(){
+    public void pairDevice(String deviceName) throws IOException {
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                if (device.getName().equals(nomeDispositivo)) {
+                if (device.getName().equals(deviceName)) {
                     mmDevice = device;
                     break;
                 }
             }
         }
+        openBT();
     }
 
     public void writeData(String data) {
@@ -117,7 +83,6 @@ public class Bluetooth extends Activity{
 
     private void openBT() throws IOException {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard //SerialPortService ID
-
         mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
         mmSocket.connect();
         Log.d("Status Conexao", "Bluetooth Conectado!!");
