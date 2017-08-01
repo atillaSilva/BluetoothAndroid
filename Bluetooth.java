@@ -30,6 +30,11 @@ public class Bluetooth extends Activity{
     private String nomeDispositivo;
 
     private Context context;
+
+    /**
+     * @param context
+     * @param nomeDispositivo
+     */
     public Bluetooth(Context context, String nomeDispositivo){
         this.context = (Context) context;
         this.nomeDispositivo  = nomeDispositivo;
@@ -44,6 +49,10 @@ public class Bluetooth extends Activity{
         CheckBlueToothState();
     }
 
+    /**
+     * Verifica se o dispositivo possui bluetooth e também se ele está ativado, caso não esteja
+     * ativado ele pede permissão ao usuário para ativar
+     */
     private void CheckBlueToothState() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
@@ -61,6 +70,10 @@ public class Bluetooth extends Activity{
             }
     }
 
+    /**
+     * Encontra os dispositivos PAREADOS com o seu dispositivo que possue o nome igual ao passado
+     * no construtor
+     */
     void findBT() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
@@ -73,7 +86,7 @@ public class Bluetooth extends Activity{
         allPairDevices();
     }
 
-    public void allPairDevices(){
+    private void allPairDevices(){
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
@@ -85,7 +98,7 @@ public class Bluetooth extends Activity{
         }
     }
 
-    private void writeData(String data) {
+    public void writeData(String data) {
         try {
             outStream = mmSocket.getOutputStream();
         } catch (IOException e) {
@@ -102,7 +115,7 @@ public class Bluetooth extends Activity{
         }
     }
 
-    void openBT() throws IOException {
+    private void openBT() throws IOException {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard //SerialPortService ID
 
         mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
